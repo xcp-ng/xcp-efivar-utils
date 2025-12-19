@@ -142,23 +142,17 @@ def make_efi_variable_authentication_2(
             signable_file.close()
 
             signature_file.close()
+            # fmt: off
             subprocess.run(
                 [
-                    "openssl",
-                    "smime",
+                    "openssl", "smime",
                     "-sign",
-                    "-in",
-                    signable_file.name,
-                    "-out",
-                    signature_file.name,
-                    "-outform",
-                    "DER",
-                    "-signer",
-                    str(signer_cert),
-                    "-inkey",
-                    str(signer_key),
-                    "-md",
-                    "SHA256",
+                    "-in", signable_file.name,
+                    "-out", signature_file.name,
+                    "-outform", "DER",
+                    "-signer", str(signer_cert),
+                    "-inkey", str(signer_key),
+                    "-md", "SHA256",
                     "-noattr",
                     "-binary",
                 ],
@@ -166,6 +160,7 @@ def make_efi_variable_authentication_2(
                 stderr=subprocess.PIPE,
                 check=True,
             )
+            # fmt: on
             signature = pathlib.Path(signature_file.name).read_bytes()
     elif signer_cert or signer_key:
         raise ValueError("Signer cert and signer key must be provided together")
