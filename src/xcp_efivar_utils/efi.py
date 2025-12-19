@@ -40,6 +40,18 @@ WIN_CERTIFICATE_UEFI_GUID = struct.Struct("<IHH16s")
 EFI_CERT_TYPE_PKCS7_GUID = uuid.UUID("4aafd29d-68df-49ee-8aa9-347d375665a7")
 WIN_CERT_TYPE_EFI_GUID = 0x0EF1
 
+# Variable names
+
+EFI_GLOBAL_VARIABLE = uuid.UUID("8be4df61-93ca-11d2-aa0d-00e098032b8c")
+EFI_IMAGE_SECURITY_DATABASE_GUID = uuid.UUID("d719b2cb-3d3a-4596-a3bc-dad00e67656f")
+
+SECURE_BOOT_VARIABLES = {
+    "PK": EFI_GLOBAL_VARIABLE,
+    "KEK": EFI_GLOBAL_VARIABLE,
+    "db": EFI_IMAGE_SECURITY_DATABASE_GUID,
+    "dbx": EFI_IMAGE_SECURITY_DATABASE_GUID,
+}
+
 
 def make_efi_signature_data_sha256(owner: uuid.UUID, hash: bytes):
     if len(hash) != 32:
@@ -89,37 +101,6 @@ def make_efi_time(time: datetime.datetime, authvar: bool, append: bool):
         )
 
 
-def convert_certificate(infile, outfile):
-    logging.info(f"converting {infile} -> {outfile}")
-    cert_forms = ["PEM", "DER"]
-    for inform in cert_forms:
-        logging.info(f"trying {inform}")
-        try:
-            subprocess.run(
-                [
-                    "openssl",
-                    "x509",
-                    "-in",
-                    str(infile),
-                    "-inform",
-                    inform,
-                    "-outform",
-                    "DER",
-                    "-out",
-                    str(outfile),
-                ],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                check=True,
-            )
-            logging.info("OK")
-            break
-        except subprocess.CalledProcessError:
-            pass
-    else:
-        raise Exception(f"Cannot convert certificate file {infile}")
-
-
 def make_efi_variable_authentication_2(
     varname: str,
     varguid: uuid.UUID,
@@ -129,8 +110,12 @@ def make_efi_variable_authentication_2(
     append: bool,
     signer_cert: typing.Union[str, pathlib.Path, None],
     signer_key: typing.Union[str, pathlib.Path, None],
-    tmpdir: str,
+    tempdir: typing.Union[str, pathlib.Path, None],
 ):
+    """
+    Returns a tuple of (EFI_VARIABLE_AUTHENTICATION_2, EFI_SIGNATURE_LIST, hashed content, PKCS7 signature) structures
+    from the given parameters.
+    """
     timestamp_bytes = make_efi_time(timestamp, authvar=True, append=append)
 
     siglists_bytes = b"".join(siglists)
@@ -148,9 +133,10 @@ def make_efi_variable_authentication_2(
 
     signature = b""
     if signer_cert and signer_key:
+        tempdir_path = pathlib.Path(tempdir) if tempdir else None
         with (
-            tempfile.NamedTemporaryFile(dir=pathlib.Path(tmpdir), delete=False) as signable_file,
-            tempfile.NamedTemporaryFile(dir=pathlib.Path(tmpdir), delete=False) as signature_file,
+            tempfile.NamedTemporaryFile(dir=tempdir_path, delete=False) as signable_file,
+            tempfile.NamedTemporaryFile(dir=tempdir_path, delete=False) as signature_file,
         ):
             signable_file.write(signable)
             signable_file.close()
