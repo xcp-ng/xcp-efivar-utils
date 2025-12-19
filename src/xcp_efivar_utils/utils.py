@@ -58,10 +58,10 @@ def named_temporary_file(mode="w+b", suffix=None, prefix=None, dir=None, delete=
 
 
 def convert_certificate_to_der(infile, outfile):
-    logging.info(f"converting {infile} -> {outfile}")
+    logging.debug(f"converting {infile} -> {outfile}")
     cert_forms = ["PEM", "DER"]
     for inform in cert_forms:
-        logging.info(f"trying {inform}")
+        logging.debug(f"trying {inform}")
         try:
             subprocess.run(
                 [
@@ -80,7 +80,7 @@ def convert_certificate_to_der(infile, outfile):
                 stderr=subprocess.PIPE,
                 check=True,
             )
-            logging.info("OK")
+            logging.debug("OK")
             break
         except subprocess.CalledProcessError:
             pass
