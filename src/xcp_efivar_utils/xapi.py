@@ -51,7 +51,7 @@ def get_pool_certs_type(session, pool_ref: typing.Any, custom=True):
 
     with tarfile.open(fileobj=cert_buf) as cert_file:
         for member in cert_file:
-            logging.debug("    %s %d %s", member.name, member.size, oct(member.mode))
+            logging.debug("%s %d %s", member.name, member.size, oct(member.mode))
             varname = os.path.basename(member.name)
             if varname not in ["PK.auth", "KEK.auth", "db.auth", "dbx.auth"] or not member.isfile():
                 raise ValueError(f"Cannot accept certs member '{varname}'")

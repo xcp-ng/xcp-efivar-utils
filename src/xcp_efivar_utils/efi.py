@@ -67,7 +67,7 @@ def make_efi_signature_data_x509(owner: uuid.UUID, cert_bytes: bytes):
 
 def make_efi_signature_list(type: uuid.UUID, signatures: typing.List[bytes]):
     siglen = len(signatures[0])
-    logging.info(f"siglen {siglen}")
+    logging.debug(f"siglen {siglen}")
     if not all(map(lambda s: len(s) == siglen, signatures)):
         raise ValueError("Invalid signature list")
     header = EFI_SIGNATURE_LIST.pack(
@@ -77,7 +77,7 @@ def make_efi_signature_list(type: uuid.UUID, signatures: typing.List[bytes]):
         siglen,  # signature size
     )
     siglist = b"".join([header] + signatures)
-    logging.info(f"siglist len {len(siglist)}")
+    logging.debug(f"siglist len {len(siglist)}")
     return siglist
 
 
@@ -119,10 +119,10 @@ def make_efi_variable_authentication_2(
     timestamp_bytes = make_efi_time(timestamp, authvar=True, append=append)
 
     siglists_bytes = b"".join(siglists)
-    logging.info(f"total siglist {len(siglists_bytes)} bytes")
+    logging.debug(f"total siglist {len(siglists_bytes)} bytes")
 
     attributes = attributes | (EFI_VARIABLE_APPEND_WRITE if append else 0)
-    logging.info(f"attributes 0x{attributes:x}")
+    logging.debug(f"attributes 0x{attributes:x}")
     signable = b"".join([
         varname.encode("utf-16le"),
         varguid.bytes_le,
