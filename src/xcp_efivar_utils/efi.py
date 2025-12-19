@@ -86,6 +86,11 @@ def make_efi_time(time: datetime.datetime, authvar: bool, append: bool):
         # use special timestamp as specified
         return EFI_TIME_APPEND
     else:
+        # Python doesn't have a built-in way to query the current timezone for naive datetime objects.
+        # Its default datetime.timezone implementation also doesn't contain DST adjustment info.
+        # This makes formatting TimeZone and especially Daylight more effort than it's worth.
+        # Just use UTC time instead.
+        time = time.astimezone(datetime.timezone.utc)
         return EFI_TIME.pack(
             time.year,  # Year
             time.month,  # Month
