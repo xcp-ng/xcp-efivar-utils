@@ -511,7 +511,7 @@ def restore_backup(args: argparse.Namespace):
         )
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(
         description="""
 Repair tool to delete variables affected by the varstored append data limit
@@ -569,3 +569,7 @@ Serialization code adapted from varstored.
     else:
         parser.print_help()
         exit(1)
+
+
+if __name__ == "__main__":
+    main()

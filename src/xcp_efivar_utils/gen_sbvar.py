@@ -34,7 +34,7 @@ def parse_timestamp(s: str):
     return datetime.datetime.strptime(s, TIMESTAMP_FORMAT)
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(
         description="""
 Implementation of Secure Boot variable generation.
@@ -170,3 +170,7 @@ depending on the parameters chosen.
         if args.output_signature:
             with args.output_signature as sigfile:
                 sigfile.write(signature)
+
+
+if __name__ == "__main__":
+    main()

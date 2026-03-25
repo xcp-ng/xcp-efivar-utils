@@ -4,7 +4,7 @@ description = "XCP-ng UEFI variable utility library"
 readme = "README.md"
 license = "BSD-2-Clause"
 license-files = ["LICENSE"]
-requires-python = ">=3.11, <4"
+requires-python = ">=3.6, <4"
 dynamic = ["version"]
 dependencies = [
   "XenAPI"
@@ -21,12 +21,17 @@ dev = [
   "flake8-pyproject",
 ]
 
+[project.scripts]
+fix-efivars = "xcp_efivar_utils.fix_efivars:main"
+gen-sbvar = "xcp_efivar_utils.gen_sbvar:main"
+secureboot-certs = "xcp_efivar_utils.secureboot_certs:main"
+
+[project.urls]
+Homepage = "https://github.com/xcp-ng/xcp-efivar-utils"
+
 [build-system]
 requires = ["setuptools >= 77.0.3", "setuptools-scm>=8", "wheel"]
 build-backend = "setuptools.build_meta"
-
-[tool.setuptools.packages.find]
-exclude = ["scripts"]
 
 [tool.setuptools_scm]
 

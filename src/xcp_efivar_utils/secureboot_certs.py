@@ -311,7 +311,7 @@ def extract(session, args):
         f.write(cert)
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(
         description="Configure guest Secure Boot variables for an XCP-ng system.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -450,3 +450,7 @@ Certificate / auth file URLs:
         sys.exit(1)
     with xapi_session() as session:
         func(session, args)
+
+
+if __name__ == "__main__":
+    main()
