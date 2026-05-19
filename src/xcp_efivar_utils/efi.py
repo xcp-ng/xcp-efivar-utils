@@ -139,34 +139,32 @@ def make_efi_variable_authentication_2(
     signature = b""
     if signer_cert and signer_key:
         tempdir_path = pathlib.Path(tempdir) if tempdir else None
-        with (
-            tempfile.NamedTemporaryFile(dir=tempdir_path, delete=False) as signable_file,
-            tempfile.NamedTemporaryFile(dir=tempdir_path, delete=False) as signature_file,
-        ):
-            signable_file.write(signable)
-            signable_file.close()
+        with tempfile.NamedTemporaryFile(dir=tempdir_path, delete=False) as signable_file:  # noqa: SIM117
+            with tempfile.NamedTemporaryFile(dir=tempdir_path, delete=False) as signature_file:
+                signable_file.write(signable)
+                signable_file.close()
 
-            signature_file.close()
-            # fmt: off
-            subprocess.run(
-                [
-                    "openssl", "smime",
-                    "-sign",
-                    "-in", signable_file.name,
-                    "-out", signature_file.name,
-                    "-outform", "DER",
-                    "-signer", str(signer_cert),
-                    "-inkey", str(signer_key),
-                    "-md", "SHA256",
-                    "-noattr",
-                    "-binary",
-                ],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                check=True,
-            )
-            # fmt: on
-            signature = pathlib.Path(signature_file.name).read_bytes()
+                signature_file.close()
+                # fmt: off
+                subprocess.run(
+                    [
+                        "openssl", "smime",
+                        "-sign",
+                        "-in", signable_file.name,
+                        "-out", signature_file.name,
+                        "-outform", "DER",
+                        "-signer", str(signer_cert),
+                        "-inkey", str(signer_key),
+                        "-md", "SHA256",
+                        "-noattr",
+                        "-binary",
+                    ],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    check=True,
+                )
+                # fmt: on
+                signature = pathlib.Path(signature_file.name).read_bytes()
     elif signer_cert or signer_key:
         raise ValueError("Signer cert and signer key must be provided together")
 
