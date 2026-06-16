@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-2-Clause
+
 import base64
 import contextlib
 import io

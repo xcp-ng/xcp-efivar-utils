@@ -2,7 +2,7 @@
 name = "xcp-efivar-utils"
 description = "XCP-ng UEFI variable utility library"
 readme = "README.md"
-license = "BSD-2-Clause"
+license = "BSD-2-Clause AND GPL-2.0-only"
 license-files = ["LICENSE"]
 requires-python = ">=3.6, <4"
 dynamic = ["version"]

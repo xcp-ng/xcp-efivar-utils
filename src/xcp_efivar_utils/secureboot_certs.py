@@ -2,6 +2,9 @@
 
 # SPDX-License-Identifier: GPL-2.0-only
 
+# Derived from the secureboot-certs script originally from
+# https://github.com/xcp-ng-rpms/varstored/blob/7e0780e22e89d727aa96a38b33dd7455101a24dc/SOURCES/secureboot-certs
+
 import argparse
 import base64
 import datetime
