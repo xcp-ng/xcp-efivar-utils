@@ -963,9 +963,6 @@ wheels = [
 [[package]]
 name = "xcp-efivar-utils"
 source = { editable = "." }
-dependencies = [
-    { name = "xenapi" },
-]
 
 [package.dev-dependencies]
 dev = [
@@ -989,10 +986,10 @@ dev = [
     { name = "typing-extensions", version = "4.7.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.7.*'" },
     { name = "typing-extensions", version = "4.13.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.8.*'" },
     { name = "typing-extensions", version = "4.14.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.9'" },
+    { name = "xenapi" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "xenapi" }]
 
 [package.metadata.requires-dev]
 dev = [
@@ -1003,6 +1000,7 @@ dev = [
     { name = "pyright" },
     { name = "ruff" },
     { name = "typing-extensions" },
+    { name = "xenapi" },
 ]
 
 [[package]]

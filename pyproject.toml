@@ -7,7 +7,6 @@ license-files = ["LICENSE"]
 requires-python = ">=3.6, <4"
 dynamic = ["version"]
 dependencies = [
-  "XenAPI"
 ]
 
 [dependency-groups]
@@ -19,6 +18,7 @@ dev = [
   "ruff",
   "typing-extensions",
   "flake8-pyproject",
+  "XenAPI",
 ]
 
 [project.scripts]

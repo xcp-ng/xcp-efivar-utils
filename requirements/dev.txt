@@ -6,4 +6,5 @@ pyright
 ruff
 typing-extensions
 flake8-pyproject
+XenAPI
 -r base.txt
