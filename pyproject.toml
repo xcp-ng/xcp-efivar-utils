@@ -101,6 +101,7 @@ section-order = [
 [tool.flake8]
 max-line-length = 120
 ignore = [
+  "E203",  # whitespace before ':' (conflicts with Ruff https://github.com/astral-sh/ruff/issues/20530)
   "E261",  # At least two spaces before inline comment
   "E302",  # Expected 2 blank lines, found 0
   "E305",  # Expected 2 blank lines after end of function or class

@@ -43,7 +43,9 @@ DEFAULT_AUTH_PATHS = {
 
 
 LATEST_URLS = {
-    "dbx": "https://github.com/microsoft/secureboot_objects/raw/refs/heads/main/PostSignedObjects/DBX/amd64/DBXUpdate.bin"
+    "dbx": (
+        "https://github.com/microsoft/secureboot_objects/raw/refs/heads/main/PostSignedObjects/DBX/amd64/DBXUpdate.bin"
+    )
 }
 
 
@@ -412,8 +414,12 @@ Certificate / auth file URLs:
 
     clear_parser = action_parsers.add_parser(
         "clear",
-        help="remove all user-installed Secure Boot variables from the pool and revert to the XCP-ng-managed defaults",
-        description="Remove all user-installed Secure Boot variables from the pool and revert to the XCP-ng-managed defaults.",
+        help=(
+            "remove all user-installed Secure Boot variables from the pool and revert to the XCP-ng-managed defaults"
+        ),
+        description=(
+            "Remove all user-installed Secure Boot variables from the pool and revert to the XCP-ng-managed defaults."
+        ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     clear_parser.set_defaults(func=clear)
