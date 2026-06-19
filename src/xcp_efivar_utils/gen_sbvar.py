@@ -123,8 +123,9 @@ depending on the parameters chosen.
             for image in images:
                 if image["hashType"] not in ["SHA256"]:
                     raise RuntimeError(f"Unsupported hash type {image['hashType']}")
-                if image.get("authenticodeHash"):
-                    hash = bytes.fromhex(image.get("authenticodeHash"))
+                authenticodeHash = image.get("authenticodeHash")
+                if authenticodeHash:
+                    hash = bytes.fromhex(authenticodeHash)
                     siglist_images.append(make_efi_signature_data_sha256(args.vendor_guid, hash))
             if siglist_images:
                 siglists.append(make_efi_signature_list(EFI_CERT_SHA256_GUID, siglist_images))
@@ -142,7 +143,7 @@ depending on the parameters chosen.
             siglist_svns = []
             svns: typing.List[dict] = data.get("svns", [])
             for svn in svns:
-                hash = bytes.fromhex(svn.get("value"))
+                hash = bytes.fromhex(svn["value"])
                 siglist_svns.append(make_efi_signature_data_sha256(SVN_OWNER_GUID, hash))
             if siglist_svns:
                 siglists.append(make_efi_signature_list(EFI_CERT_SHA256_GUID, siglist_svns))

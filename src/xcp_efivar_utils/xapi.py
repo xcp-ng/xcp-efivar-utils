@@ -7,7 +7,7 @@ import logging
 import os
 import tarfile
 
-import XenAPI
+import XenAPI  # type: ignore[import-untyped]
 
 import typing
 
@@ -15,8 +15,8 @@ import typing
 
 
 @contextlib.contextmanager
-def xapi_session(uname="root", pwd="", originator="xcp-efivar-utils"):
-    session = XenAPI.xapi_local()
+def xapi_session(uname="root", pwd="", originator="xcp-efivar-utils") -> typing.Any:
+    session: typing.Any = XenAPI.xapi_local()
     session.xenapi.login_with_password(uname, pwd, XenAPI.API_VERSION_1_2, originator)
     try:
         yield session

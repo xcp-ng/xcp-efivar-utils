@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 
 import argparse
-import tomllib
+import sys
 from pathlib import Path
+
+if sys.version_info < (3, 11):
+    raise NotImplementedError("Must run this script using Python 3.11 or later")
+
+import tomllib  # type:ignore[import-not-found]
 
 parser = argparse.ArgumentParser(description="Convert the dependencies from pyproject.toml in requirements.txt files")
 args = parser.parse_args()
