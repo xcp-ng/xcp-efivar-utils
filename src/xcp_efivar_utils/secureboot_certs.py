@@ -202,7 +202,7 @@ def install(session, args) -> None:
     with tempfile.TemporaryDirectory() as tempdir:
         auths = dict()
         for name in ["PK", "KEK", "db", "dbx"]:
-            p = getpath(args, tempdir, name)
+            p = getpath(args, name, tempdir)
             if not p:
                 continue
             if not is_auth(p):
@@ -211,7 +211,7 @@ def install(session, args) -> None:
             auths[name] = p
 
         with create_tarball(auths) as tarball:
-            data = base64.b64encode(tarball.getvalue())
+            data = base64.b64encode(tarball.getvalue()).decode()
 
         pool_ref = get_pool_ref(session, None)
         if not pool_ref:
@@ -380,7 +380,7 @@ Certificate / auth file URLs:
 """.format(LATEST_URLS["dbx"]),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    install_parser.set_defaults(action=install)
+    install_parser.set_defaults(func=install)
     install_parser.add_argument(
         "--user-agent",
         help="custom user agent to download default certificates from the Internet",
@@ -444,7 +444,7 @@ Certificate / auth file URLs:
         description="Extract a Secure Boot variable from XAPI and save it to disk.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    extract_parser.set_defaults(action=extract)
+    extract_parser.set_defaults(func=extract)
     extract_parser.add_argument(
         "cert",
         choices=["PK", "KEK", "db", "dbx"],
