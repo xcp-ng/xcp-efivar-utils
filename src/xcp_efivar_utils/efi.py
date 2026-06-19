@@ -33,7 +33,8 @@ EFI_VARIABLE_SECUREBOOT_KEYS = (
 EFI_VARIABLE_APPEND_WRITE = 0x00000040
 
 EFI_TIME = struct.Struct("<HBBBBBBIhBB")
-assert EFI_TIME.size == 16
+if EFI_TIME.size != 16:
+    raise RuntimeError(f"Unexpected EFI_TIME size {EFI_TIME.size}")
 
 # Special EFI_TIME for use on append-mode EFI_VARIABLE_AUTHENTICATION_2 structures
 EFI_TIME_APPEND = EFI_TIME.pack(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)

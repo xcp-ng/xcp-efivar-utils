@@ -236,10 +236,14 @@ def report_esls(buf: bytes):
 
         sigtype = uuid.UUID(bytes_le=sigtype)
         if sigtype == EFI_CERT_SHA256_GUID:
-            assert siglen == 48 and len(siglist) % siglen == 0
+            if siglen != 48:
+                raise RuntimeError(f"Signature length {siglen} is invalid")
+            if len(siglist) % siglen != 0:
+                raise RuntimeError(f"Signature list length {len(siglist)} is invalid")
             print("\t- EFI_SIGNATURE_LIST of type EFI_CERT_SHA256_GUID (%d hashes)" % (esl_size // siglen))
         elif sigtype == EFI_CERT_X509_GUID:
-            assert len(siglist) == siglen
+            if len(siglist) != siglen:
+                raise RuntimeError(f"Signature length {siglen} != {len(siglist)}")
             print("\t- EFI_SIGNATURE_LIST of type EFI_CERT_X509_GUID")
 
             owner = siglist[:16]
