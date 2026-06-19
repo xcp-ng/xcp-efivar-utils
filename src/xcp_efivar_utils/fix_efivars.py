@@ -155,7 +155,7 @@ class EfiVariables:
         return self._ppi_vdata
 
     @staticmethod
-    def xapidb_parse_blob(buf: bytes):
+    def xapidb_parse_blob(buf: bytes) -> "EfiVariables":
         buflen = len(buf)
 
         (buf, magic, version, count, datalen) = unserialize_struct(HEADER_STRUCT, buf)
@@ -190,7 +190,7 @@ class EfiVariables:
             ppi_vdata=ppi_vdata,
         )
 
-    def var_count(self, only_nv: bool):
+    def var_count(self, only_nv: bool) -> int:
         result = 0
 
         for variable in self.variables:
@@ -201,7 +201,7 @@ class EfiVariables:
 
         return result
 
-    def data_len(self, only_nv: bool):
+    def data_len(self, only_nv: bool) -> int:
         result = 0
 
         for variable in self.variables:
@@ -214,7 +214,7 @@ class EfiVariables:
 
         return result
 
-    def xapidb_serialize_variables(self, only_nv: bool):
+    def xapidb_serialize_variables(self, only_nv: bool) -> bytes:
         out = b""
 
         var_count = self.var_count(only_nv)
@@ -250,7 +250,7 @@ class EfiVariables:
         return out
 
 
-def filter_variables(variables: Iterable[EfiVariable]):
+def filter_variables(variables: Iterable[EfiVariable]) -> Tuple[List[EfiVariable], int, int]:
     """
     Delete oversized variables. Report outdated and oversized variables.
 
@@ -296,7 +296,7 @@ def filter_variables(variables: Iterable[EfiVariable]):
     return (fixed_variables, all_outdated_count, oversize_count)
 
 
-def probe_vm_type(session, vm_ref):
+def probe_vm_type(session, vm_ref) -> Tuple[str, bool, bool]:
     vm_type = "VM"
     should_skip = False
     is_fixable = True
@@ -322,7 +322,7 @@ def do_scan_vm(
     backup_path: Optional[str] = None,
     overwrite_backup: bool = False,
     dry_run: bool = False,
-):
+) -> int:
     vm_uuid = session.xenapi.VM.get_uuid(vm_ref)
 
     vm_type, should_skip, is_fixable = probe_vm_type(session, vm_ref)
@@ -404,7 +404,7 @@ def do_scan_vm(
     return all_outdated_count
 
 
-def do_scan_pool(session, *, pool_ref: Any):
+def do_scan_pool(session, *, pool_ref: Any) -> None:
     print("Scanning pool certs", file=sys.stderr)
     pool_certs, _ = get_pool_certs(session, pool_ref)
 
@@ -442,7 +442,7 @@ def do_restore_backup(
     backup_path: Optional[str] = None,
     overwrite_backup: bool = False,
     dry_run: bool = False,
-):
+) -> None:
     vm_uuid = session.xenapi.VM.get_uuid(vm_ref)
 
     nvram: Dict[str, str] = session.xenapi.VM.get_NVRAM(vm_ref)
@@ -474,7 +474,7 @@ def do_restore_backup(
     print("Restore OK", file=sys.stderr)
 
 
-def scan_vm(args: argparse.Namespace):
+def scan_vm(args: argparse.Namespace) -> None:
     if not args.verbose:
         logging.getLogger().setLevel(logging.INFO)
     with xapi_session() as session:
@@ -489,7 +489,7 @@ def scan_vm(args: argparse.Namespace):
         )
 
 
-def scan_pool(args: argparse.Namespace):
+def scan_pool(args: argparse.Namespace) -> None:
     if not args.verbose:
         logging.getLogger().setLevel(logging.WARN)
     with xapi_session() as session:
@@ -497,7 +497,7 @@ def scan_pool(args: argparse.Namespace):
         do_scan_pool(session, pool_ref=pool_ref)
 
 
-def restore_backup(args: argparse.Namespace):
+def restore_backup(args: argparse.Namespace) -> None:
     with xapi_session() as session:
         vm_ref = session.xenapi.VM.get_by_uuid(args.vm_uuid)
         do_restore_backup(
@@ -510,7 +510,7 @@ def restore_backup(args: argparse.Namespace):
         )
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="""
 Repair tool to delete variables affected by the varstored append data limit

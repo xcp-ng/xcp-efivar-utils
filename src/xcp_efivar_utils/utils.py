@@ -8,16 +8,16 @@ import struct
 import subprocess
 import tempfile
 
-import typing
+from typing import IO, Any, Generator, Tuple, Union
 
 # Assorted utility functions
 
 
-def unserialize(format: typing.Union[str, bytes], buf: bytes):
+def unserialize(format: Union[str, bytes], buf: bytes):
     return (buf[struct.calcsize(format) :],) + struct.unpack_from(format, buf)
 
 
-def unserialize_data(buf: bytes, rem: int, limit: int, strict: bool = True):
+def unserialize_data(buf: bytes, rem: int, limit: int, strict: bool = True) -> Tuple[bytes, bytes]:
     buf, buflen = unserialize("<Q", buf)
     logging.debug("next data length = %d", buflen)
 
@@ -42,7 +42,9 @@ def unserialize_struct(s: struct.Struct, buf: bytes):
 
 
 @contextlib.contextmanager
-def named_temporary_file(mode="w+b", suffix=None, prefix=None, dir=None, delete=True, **kwargs):
+def named_temporary_file(
+    mode="w+b", suffix=None, prefix=None, dir=None, delete=True, **kwargs
+) -> Generator[Tuple[IO[Any], str], Any, None]:
     """
     Unlike tempfile.NamedTemporaryFile, this function only deletes the temp file at context manager exit.
     Also unlike tempfile.NamedTemporaryFile, it returns a tuple (fileobj, path) rather than passing the path in
@@ -59,7 +61,7 @@ def named_temporary_file(mode="w+b", suffix=None, prefix=None, dir=None, delete=
             os.unlink(tmp_name)
 
 
-def convert_certificate_to_der(infile, outfile):
+def convert_certificate_to_der(infile, outfile) -> None:
     logging.debug(f"converting {infile} -> {outfile}")
     cert_forms = ["PEM", "DER"]
     for inform in cert_forms:
@@ -90,7 +92,7 @@ def convert_certificate_to_der(infile, outfile):
         raise Exception(f"Cannot convert certificate file {infile}")
 
 
-def read_certificate_as_der(infile, tmpdir):
+def read_certificate_as_der(infile, tmpdir) -> bytes:
     with named_temporary_file(dir=tmpdir) as (cert_der, cert_path):
         cert_der.close()
         convert_certificate_to_der(infile, cert_path)

@@ -34,7 +34,9 @@ from xcp_efivar_utils.xapi import (
     xapi_session,
 )
 
-DEFAULT_AUTH_PATHS = {
+from typing import Dict, Optional
+
+DEFAULT_AUTH_PATHS: Dict[str, str] = {
     "PK": "/usr/share/varstored/PK.auth",
     "KEK": "/usr/share/varstored/KEK.auth",
     "db": "/usr/share/varstored/db.auth",
@@ -42,14 +44,14 @@ DEFAULT_AUTH_PATHS = {
 }
 
 
-LATEST_URLS = {
+LATEST_URLS: Dict[str, str] = {
     "dbx": (
         "https://github.com/microsoft/secureboot_objects/raw/refs/heads/main/PostSignedObjects/DBX/amd64/DBXUpdate.bin"
     )
 }
 
 
-def efi_time_to_timestamp(*args):
+def efi_time_to_timestamp(*args) -> datetime.datetime:
     return datetime.datetime(
         args[0],
         args[1],
@@ -62,7 +64,7 @@ def efi_time_to_timestamp(*args):
     )
 
 
-def download(url, tempdir, fname=None, user_agent=None):
+def download(url, tempdir, fname=None, user_agent=None) -> Optional[str]:
     """Download a file.
 
     url:   the url to the remote file.
@@ -76,7 +78,7 @@ def download(url, tempdir, fname=None, user_agent=None):
         fname = url
     fname = pathlib.Path(tempdir) / os.path.basename(fname)
     d = None
-    dest = None
+    dest: Optional[str] = None
     try:
         print("Downloading %s..." % url)
 
@@ -119,7 +121,7 @@ def download(url, tempdir, fname=None, user_agent=None):
     return dest
 
 
-def is_auth(path):
+def is_auth(path) -> bool:
     """Return True if path is an EFI auth file, otherwise returns False."""
     with open(path, "rb") as f:
         auth = f.read()
@@ -153,7 +155,7 @@ def is_auth(path):
     return True
 
 
-def create_tarball(paths):
+def create_tarball(paths) -> io.BytesIO:
     tarball = io.BytesIO()
     with tarfile.open(mode="w", fileobj=tarball) as tar:
         for name, path in paths.items():
@@ -161,7 +163,7 @@ def create_tarball(paths):
     return tarball
 
 
-def getpath(args, name, tempdir):
+def getpath(args, name, tempdir) -> Optional[str]:
     val = getattr(args, name)
     if os.path.exists(val):
         logging.debug("using file %s for %s", val, name)
@@ -179,7 +181,7 @@ def getpath(args, name, tempdir):
         sys.exit(1)
 
 
-def validate_args(args):
+def validate_args(args) -> None:
     valid_values = {
         "PK": ["default"],
         "KEK": ["default"],
@@ -194,7 +196,7 @@ def validate_args(args):
             sys.exit(1)
 
 
-def install(session, args):
+def install(session, args) -> None:
     validate_args(args)
 
     with tempfile.TemporaryDirectory() as tempdir:
@@ -219,14 +221,14 @@ def install(session, args):
         print("Successfully installed custom certificates to the XAPI DB for pool.")
 
 
-def clear(session, _args):
+def clear(session, _args) -> None:
     for pool_ref in session.xenapi.pool.get_all():
         pool_uuid = session.xenapi.pool.get_uuid(pool_ref)
         session.xenapi.pool.set_custom_uefi_certificates(pool_ref, "")
         print("Cleared certificates from XAPI DB for pool %s." % pool_uuid)
 
 
-def report_esls(buf: bytes):
+def report_esls(buf: bytes) -> None:
     while buf:
         print("\t--------------------")
 
@@ -265,7 +267,7 @@ def report_esls(buf: bytes):
             )
 
 
-def report_auth(auth: bytes):
+def report_auth(auth: bytes) -> None:
     _timestamp = unserialize_struct(EFI_TIME, auth)
     auth = _timestamp[0]
     print("\tTimestamp: %s" % efi_time_to_timestamp(*_timestamp[1:]))
@@ -278,7 +280,7 @@ def report_auth(auth: bytes):
     print("\t--------------------")
 
 
-def print_cert(path, auth):
+def print_cert(path, auth) -> None:
     print("\t====================")
     print("\tAuth file: %s" % os.path.basename(path))
     print("\t====================")
@@ -286,7 +288,7 @@ def print_cert(path, auth):
     print()
 
 
-def report(session, _args):
+def report(session, _args) -> None:
     try:
         print("\n{} -- Report".format(os.path.basename(sys.argv[0])))
         pool_ref = get_pool_ref(session, None)
@@ -307,7 +309,7 @@ def report(session, _args):
         sys.exit(1)
 
 
-def extract(session, args):
+def extract(session, args) -> None:
     pool_ref = get_pool_ref(session, None)
     certs, _ = get_pool_certs(session, pool_ref)
     cert = certs.get(args.cert)
@@ -320,7 +322,7 @@ def extract(session, args):
         f.write(cert)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Configure guest Secure Boot variables for an XCP-ng system.",
         formatter_class=argparse.RawDescriptionHelpFormatter,

@@ -8,7 +8,7 @@ import subprocess
 import tempfile
 import uuid
 
-import typing
+from typing import List, Tuple, Union
 
 # UEFI variable declarations per the spec
 
@@ -56,19 +56,19 @@ SECURE_BOOT_VARIABLES = {
 }
 
 
-def make_efi_signature_data_sha256(owner: uuid.UUID, hash: bytes):
+def make_efi_signature_data_sha256(owner: uuid.UUID, hash: bytes) -> bytes:
     if len(hash) != 32:
         raise ValueError("Invalid hash length")
     return owner.bytes_le + hash
 
 
-def make_efi_signature_data_x509(owner: uuid.UUID, cert_bytes: bytes):
+def make_efi_signature_data_x509(owner: uuid.UUID, cert_bytes: bytes) -> bytes:
     if not cert_bytes:
         raise ValueError("Empty cert_bytes")
     return owner.bytes_le + cert_bytes
 
 
-def make_efi_signature_list(type: uuid.UUID, signatures: typing.List[bytes]):
+def make_efi_signature_list(type: uuid.UUID, signatures: List[bytes]) -> bytes:
     siglen = len(signatures[0])
     logging.debug(f"siglen {siglen}")
     if not all(map(lambda s: len(s) == siglen, signatures)):
@@ -84,7 +84,7 @@ def make_efi_signature_list(type: uuid.UUID, signatures: typing.List[bytes]):
     return siglist
 
 
-def make_efi_time(time: datetime.datetime, authvar: bool, append: bool):
+def make_efi_time(time: datetime.datetime, authvar: bool, append: bool) -> bytes:
     if append:
         # use special timestamp as specified
         return EFI_TIME_APPEND
@@ -112,14 +112,14 @@ def make_efi_time(time: datetime.datetime, authvar: bool, append: bool):
 def make_efi_variable_authentication_2(
     varname: str,
     varguid: uuid.UUID,
-    siglists: typing.List[bytes],
+    siglists: List[bytes],
     timestamp: datetime.datetime,
     attributes: int,
     append: bool,
-    signer_cert: typing.Union[str, pathlib.Path, None],
-    signer_key: typing.Union[str, pathlib.Path, None],
-    tempdir: typing.Union[str, pathlib.Path, None],
-):
+    signer_cert: Union[str, pathlib.Path, None],
+    signer_key: Union[str, pathlib.Path, None],
+    tempdir: Union[str, pathlib.Path, None],
+) -> Tuple[bytes, bytes, bytes, bytes]:
     """
     Returns a tuple of (EFI_VARIABLE_AUTHENTICATION_2, EFI_SIGNATURE_LIST, hashed content, PKCS7 signature) structures
     from the given parameters.

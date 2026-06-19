@@ -21,9 +21,9 @@ from xcp_efivar_utils.efi import (
 )
 from xcp_efivar_utils.utils import read_certificate_as_der
 
-import typing
+from typing import Any, Dict, List
 
-SUPPORTED_ARCHITECTURES = {
+SUPPORTED_ARCHITECTURES: Dict[str, str] = {
     "x86_64": "x64",
 }
 
@@ -32,11 +32,11 @@ SVN_OWNER_GUID = uuid.UUID("9d132b6c-59d5-4388-ab1c-185cfcb2eb92")
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 
 
-def parse_timestamp(s: str):
+def parse_timestamp(s: str) -> datetime.datetime:
     return datetime.datetime.strptime(s, TIMESTAMP_FORMAT)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="""
 Implementation of Secure Boot variable generation.
@@ -108,18 +108,18 @@ depending on the parameters chosen.
         data_arch = SUPPORTED_ARCHITECTURES[rpm_arch]
         sets = set(args.sets)
         with args.input as ifile:
-            data = json.load(ifile)
+            data: Any = json.load(ifile)
     else:
         data_arch = ""
         sets = {"certificates"}
-        data: typing.Any = {"certificates": [{"value": cert} for cert in args.certs]}
+        data = {"certificates": [{"value": cert} for cert in args.certs]}
 
     with tempfile.TemporaryDirectory() as tempdir:
         siglists = []
 
         if "images" in sets:
             siglist_images = []
-            images: typing.List[dict] = data["images"][data_arch]
+            images: List[dict] = data["images"][data_arch]
             for image in images:
                 if image["hashType"] not in ["SHA256"]:
                     raise RuntimeError(f"Unsupported hash type {image['hashType']}")
@@ -131,7 +131,7 @@ depending on the parameters chosen.
                 siglists.append(make_efi_signature_list(EFI_CERT_SHA256_GUID, siglist_images))
 
         if "certificates" in sets:
-            certs: typing.List[dict] = data["certificates"]
+            certs: List[dict] = data["certificates"]
             cert_path: pathlib.Path = args.cert_search_path or pathlib.Path.cwd()
             for cert in certs:
                 cert_bytes = read_certificate_as_der(cert_path / cert["value"], tempdir)
@@ -141,7 +141,7 @@ depending on the parameters chosen.
 
         if "svns" in sets:
             siglist_svns = []
-            svns: typing.List[dict] = data.get("svns", [])
+            svns: List[dict] = data.get("svns", [])
             for svn in svns:
                 hash = bytes.fromhex(svn["value"])
                 siglist_svns.append(make_efi_signature_data_sha256(SVN_OWNER_GUID, hash))
