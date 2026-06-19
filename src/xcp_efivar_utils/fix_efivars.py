@@ -22,19 +22,16 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 XCPNG_SIGNATURE_OWNER = uuid.UUID("9be025e2-415b-435d-ad61-6b3e094fc28d").bytes_le
 
 DB_MAGIC = b"VARS"
-DB_HEADER_LEN = len(DB_MAGIC) + struct.calcsize("<IQQ")
-if DB_HEADER_LEN != 24:
-    raise RuntimeError(f"Unexpected DB_HEADER_LEN {DB_HEADER_LEN}")
 DB_VERSION = 2
 
 HEADER_STRUCT = struct.Struct("<4sIQQ")
 if HEADER_STRUCT.size != 24:
     raise RuntimeError(f"Unexpected HEADER_STRUCT size {HEADER_STRUCT.size}")
 
-ANCILLARY_DATA_LEN_V2 = 8 + 0x104
-ANCILLARY_DATA_LEN = ANCILLARY_DATA_LEN_V2
-
 PPI_VDATA = struct.Struct("<I256s")
+# Length of ancillary data prepended to the main variable data.
+# Currently, it is the mor_key and ppi_vdata.
+ANCILLARY_DATA_LEN_V2 = 8 + PPI_VDATA.size
 
 EFI_VARIABLE_TAIL = struct.Struct("<16sI16s32s")
 VARIABLE_SIZE = struct.calcsize("<QQ") + EFI_VARIABLE_TAIL.size
@@ -170,7 +167,7 @@ class EfiVariables:
         if count > MAX_VARIABLE_COUNT:
             raise ValueError(f"Invalid variable count {count} > {MAX_VARIABLE_COUNT}")
 
-        buflen -= DB_HEADER_LEN
+        buflen -= HEADER_STRUCT.size
 
         mor_key = b""
         ppi_vdata = (0, b"")
