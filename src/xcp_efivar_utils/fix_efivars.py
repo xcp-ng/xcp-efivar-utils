@@ -5,6 +5,7 @@
 import argparse
 import base64
 import logging
+import os
 import struct
 import sys
 import time
@@ -449,6 +450,12 @@ def do_restore_backup(
     efivars = nvram.get(NVRAM_KEY)
     if efivars:
         backup_path = backup_path or f"{vm_uuid}.{int(time.time())}.efivars.b64"
+        try:
+            if os.path.samefile(restore_path, backup_path):
+                raise RuntimeError("Restore path cannot equal backup path")
+        except FileNotFoundError:
+            # either file doesn't exist, for the backup it's ok, for the restore we want to handle below
+            pass
         print(f"Backing up existing variables to {backup_path}", file=sys.stderr)
         with open(backup_path, "w" if overwrite_backup else "x") as backup:
             backup.write(efivars)
