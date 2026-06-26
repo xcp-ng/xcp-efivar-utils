@@ -14,6 +14,7 @@ from xcp_efivar_utils.efi import (
     EFI_CERT_SHA256_GUID,
     EFI_CERT_X509_GUID,
     EFI_VARIABLE_SECUREBOOT_KEYS,
+    SVN_OWNER_GUID,
     make_efi_signature_data_sha256,
     make_efi_signature_data_x509,
     make_efi_signature_list,
@@ -26,8 +27,6 @@ from typing import Any, Dict, List
 SUPPORTED_ARCHITECTURES: Dict[str, str] = {
     "x86_64": "x64",
 }
-
-SVN_OWNER_GUID = uuid.UUID("9d132b6c-59d5-4388-ab1c-185cfcb2eb92")
 
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 

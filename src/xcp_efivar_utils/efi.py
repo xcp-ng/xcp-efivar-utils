@@ -7,6 +7,7 @@ import struct
 import subprocess
 import tempfile
 import uuid
+from dataclasses import dataclass
 
 from typing import List, Tuple, Union
 
@@ -55,11 +56,35 @@ SECURE_BOOT_VARIABLES = {
     "dbx": EFI_IMAGE_SECURITY_DATABASE_GUID,
 }
 
+SVN_OWNER_GUID = uuid.UUID("9d132b6c-59d5-4388-ab1c-185cfcb2eb92")
+DBX_SVN_STRUCT = struct.Struct("<B16sHH11s")
+if DBX_SVN_STRUCT.size != 32:
+    raise RuntimeError(f"Unexpected DBX_SVN_STRUCT size {DBX_SVN_STRUCT.size}")
+
+
+@dataclass(frozen=True)
+class DbxSvnEntry:
+    version: int
+    application_guid: uuid.UUID
+    minor_svn: int
+    major_svn: int
+
+    @staticmethod
+    def parse(hash: bytes) -> "DbxSvnEntry":
+        version, application_guid, minor_svn, major_svn, _reserved = DBX_SVN_STRUCT.unpack(hash)
+        return DbxSvnEntry(version=version, application_guid=application_guid, minor_svn=minor_svn, major_svn=major_svn)
+
 
 def make_efi_signature_data_sha256(owner: uuid.UUID, hash: bytes) -> bytes:
     if len(hash) != 32:
         raise ValueError("Invalid hash length")
     return owner.bytes_le + hash
+
+
+def unmake_efi_signature_data_sha256(sigdata: bytes) -> Tuple[uuid.UUID, bytes]:
+    if len(sigdata) != 48:
+        raise ValueError("Invalid signature data length")
+    return uuid.UUID(bytes_le=sigdata[:16]), sigdata[16:]
 
 
 def make_efi_signature_data_x509(owner: uuid.UUID, cert_bytes: bytes) -> bytes:

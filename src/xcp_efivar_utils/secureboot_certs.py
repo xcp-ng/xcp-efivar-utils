@@ -25,7 +25,10 @@ from xcp_efivar_utils.efi import (
     EFI_CERT_X509_GUID,
     EFI_SIGNATURE_LIST,
     EFI_TIME,
+    SVN_OWNER_GUID,
     WIN_CERTIFICATE_UEFI_GUID,
+    DbxSvnEntry,
+    unmake_efi_signature_data_sha256,
 )
 from xcp_efivar_utils.utils import unserialize_struct
 from xcp_efivar_utils.xapi import (
@@ -228,7 +231,7 @@ def clear(session, _args) -> None:
         print("Cleared certificates from XAPI DB for pool %s." % pool_uuid)
 
 
-def report_esls(buf: bytes) -> None:
+def report_esls(varname: str, buf: bytes) -> None:
     while buf:
         print("\t--------------------")
 
@@ -243,6 +246,16 @@ def report_esls(buf: bytes) -> None:
             if len(siglist) % siglen != 0:
                 raise RuntimeError(f"Signature list length {len(siglist)} is invalid")
             print("\t- EFI_SIGNATURE_LIST of type EFI_CERT_SHA256_GUID (%d hashes)" % (esl_size // siglen))
+            if varname == "dbx":
+                for start in range(0, len(siglist), 48):
+                    owner, hash = unmake_efi_signature_data_sha256(siglist[start : (start + 48)])
+                    if owner == SVN_OWNER_GUID:
+                        pass
+                    svn = DbxSvnEntry.parse(hash)
+                    print(
+                        f"\t    - SVN{svn.version} for application {svn.application_guid}: "
+                        f"version {svn.major_svn}.{svn.minor_svn}"
+                    )
         elif sigtype == EFI_CERT_X509_GUID:
             if len(siglist) != siglen:
                 raise RuntimeError(f"Signature length {siglen} != {len(siglist)}")
@@ -280,7 +293,7 @@ def report_auth(varname: str, auth) -> None:
         WIN_CERTIFICATE_UEFI_GUID, auth
     )
     _signature = auth[0 : win_cert_len - WIN_CERTIFICATE_UEFI_GUID.size]
-    report_esls(auth[win_cert_len - WIN_CERTIFICATE_UEFI_GUID.size :])
+    report_esls(varname, auth[win_cert_len - WIN_CERTIFICATE_UEFI_GUID.size :])
     print("\t--------------------")
 
     print()
