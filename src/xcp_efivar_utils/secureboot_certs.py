@@ -267,7 +267,11 @@ def report_esls(buf: bytes) -> None:
             )
 
 
-def report_auth(auth: bytes) -> None:
+def report_auth(varname: str, auth) -> None:
+    print("\t====================")
+    print("\tAuth variable: %s" % varname)
+    print("\t====================")
+
     _timestamp = unserialize_struct(EFI_TIME, auth)
     auth = _timestamp[0]
     print("\tTimestamp: %s" % efi_time_to_timestamp(*_timestamp[1:]))
@@ -279,12 +283,6 @@ def report_auth(auth: bytes) -> None:
     report_esls(auth[win_cert_len - WIN_CERTIFICATE_UEFI_GUID.size :])
     print("\t--------------------")
 
-
-def print_cert(path, auth) -> None:
-    print("\t====================")
-    print("\tAuth file: %s" % os.path.basename(path))
-    print("\t====================")
-    report_auth(auth)
     print()
 
 
@@ -300,7 +298,7 @@ def report(session, _args) -> None:
         for name in ["PK", "KEK", "db", "dbx"]:
             auth = certs.get(name)
             if auth:
-                print_cert(name, auth)
+                report_auth(name, auth)
     except IOError:
         # This technique taken from: https://docs.python.org/3/library/signal.html#note-on-sigpipe
         # Redirect further stdout flushing (like the broken pipe err message) to /dev/null
